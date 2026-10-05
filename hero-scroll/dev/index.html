@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORON hero-scroll 로컬 테스트</title>
+<style>
+  html, body { margin: 0; background: #FBFAF8; font-family: 'Montserrat', 'Space Grotesk', sans-serif; }
+  .mock { display: grid; place-items: center; height: 70vh; text-align: center; color: #363636; }
+  .mock h2 { font-size: 40px; margin: 0 0 8px; }
+  a.btn { text-decoration: none; }
+</style>
+</head>
+<body>
+  <section class="mock"><div><h2>HEADER (아임웹 다른 섹션)</h2><p>아래로 스크롤하면 히어로가 고정되어 영상이 재생됩니다.</p></div></section>
+
+  <div id="mount"></div>
+
+  <section class="mock" style="background:#fff"><div><h2>NEXT SECTION</h2><p>히어로가 끝나면 이 섹션이 이어집니다.</p></div></section>
+
+<script>
+  // 로컬 테스트용: 프레임 폴더는 한 칸 위(../frames/)
+  window.ORON_HERO_CONFIG = { base: '../frames/' };
+
+  fetch('../hero-scroll.html').then(function (r) { return r.text(); }).then(function (html) {
+    // 스크립트까지 실행되도록 fragment 로 삽입 (아임웹 코드 위젯과 같은 방식)
+    document.getElementById('mount').appendChild(document.createRange().createContextualFragment(html));
+  });
+</script>
+</body>
+</html>

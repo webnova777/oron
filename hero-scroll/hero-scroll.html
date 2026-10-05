@@ -38,7 +38,7 @@
   /* ---- 문구 영역 ---- */
   #oron-hero .oron-copy {
     position: absolute; z-index: 2;
-    left: clamp(24px, 6vw, 112px); top: 50%; transform: translateY(-50%);
+    left: clamp(24px, 6vw, 112px); top: 40%; transform: translateY(-50%); /* 영상 끝의 낱개 포장이 아래쪽에 놓이므로 문구는 위쪽으로 */
     width: min(48vw, 760px);
     text-align: left;
     font-family: 'Montserrat', 'Space Grotesk', 'SUITE', sans-serif;
@@ -50,7 +50,7 @@
     font-size: clamp(14px, 1.45vw, 22px) !important; font-weight: 500; letter-spacing: -.01em; line-height: 1.5;
   }
   #oron-hero .oron-copy [style*="font-size: 96px"] {
-    font-size: clamp(34px, 5.2vw, 84px) !important; line-height: 1.04; letter-spacing: -.025em; font-weight: 800;
+    font-size: clamp(30px, 4.2vw, 72px) !important; line-height: 1.04; letter-spacing: -.025em; font-weight: 800;
   }
 
   /* 하나씩 등장: 시작은 숨김 → is-in 이 붙으면 나타남 */
@@ -102,8 +102,7 @@
 
   /* ---- 모바일: 문구를 아래로 ---- */
   @media (max-width: 820px) {
-    #oron-hero .oron-veil { opacity: 1; }
-    #oron-hero .oron-copy { left: 20px; right: 20px; width: auto; top: auto; bottom: 64px; transform: none; text-align: center; }
+    #oron-hero .oron-copy { left: 20px; right: 20px; width: auto; top: auto; bottom: 72px; transform: none; text-align: center; }
     #oron-hero .oron-copy h1, #oron-hero .oron-copy p { text-align: center !important; }
     #oron-hero .oron-copy [style*="font-size: 96px"] { font-size: clamp(28px, 9vw, 48px) !important; }
     #oron-hero #hero-title { margin: 8px 0 18px; }
@@ -166,11 +165,13 @@
   // ===== 설정 (여기만 바꾸면 됩니다) =====
   var DEFAULTS = {
     base: 'https://cdn.jsdelivr.net/gh/webnova777/oron@main/hero-scroll/frames/', // 프레임 이미지 폴더 주소(끝에 / 포함)
-    count: 144,            // 프레임 총 개수 (0001.webp ~ 0144.webp)
+    count: 301,            // 프레임 총 개수 (0001.webp ~ 0301.webp)
     ext: 'webp',
     videoEnd: 0.64,        // 스크롤 진행도 0~이 값 사이에 영상 재생, 이후는 마지막 프레임 유지
     steps: [0.70, 0.78, 0.86, 0.94], // 문구 등장 시점: 소개문 → GOOD PRODUCTS. → NEW MARKET. → 버튼
-    mobileFocusX: 0.72,    // 세로 화면에서 영상의 어느 쪽을 보여줄지 (0=왼쪽, 1=오른쪽)
+    mobileVisible: 0.68,   // 세로 화면에서 영상 가로의 몇 %를 보여줄지 (제품이 있는 가운데 부분)
+    mobileFocusX: 0.53,    // 보여줄 부분의 중심 (0=왼쪽 끝, 1=오른쪽 끝)
+    mobileCenterY: 0.34,   // 영상이 놓일 세로 위치 (0=맨 위, 1=맨 아래)
     lenisSrc: 'https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js'
   };
   var cfg = Object.assign({}, DEFAULTS, window.ORON_HERO_CONFIG || {});
@@ -250,10 +251,26 @@
     }
     if (!img) return;
     var iw = img.naturalWidth, ih = img.naturalHeight;
-    var s = Math.max(cw / iw, ch / ih), dw = iw * s, dh = ih * s;
-    var fx = cw < ch ? cfg.mobileFocusX : 0.5;
     ctx.fillStyle = '#FBFAF8'; ctx.fillRect(0, 0, cw, ch);
-    ctx.drawImage(img, (cw - dw) * fx, (ch - dh) * 0.5, dw, dh);
+
+    if (cw < ch) {
+      // 세로 화면: 영상 가운데 부분(제품이 있는 곳)을 가로에 맞춰 위쪽에 두고, 문구는 아래에 둡니다.
+      var s = cw / (iw * cfg.mobileVisible), dw = iw * s, dh = ih * s;
+      var dx = cw / 2 - cfg.mobileFocusX * dw, dy = ch * cfg.mobileCenterY - dh / 2;
+      ctx.drawImage(img, dx, dy, dw, dh);
+      // 영상 위·아래 경계가 티 나지 않게 배경색으로 부드럽게 덮기
+      var fade = dh * 0.16;
+      [[dy, dy + fade, 1, 0], [dy + dh, dy + dh - fade, 1, 0]].forEach(function (g) {
+        var grad = ctx.createLinearGradient(0, g[0], 0, g[1]);
+        grad.addColorStop(0, 'rgba(251,250,248,1)'); grad.addColorStop(1, 'rgba(251,250,248,0)');
+        ctx.fillStyle = grad; ctx.fillRect(0, Math.min(g[0], g[1]), cw, fade);
+      });
+      ctx.fillStyle = '#FBFAF8';
+      ctx.fillRect(0, 0, cw, Math.max(0, dy)); ctx.fillRect(0, dy + dh, cw, ch - dy - dh);
+      return;
+    }
+    var sc = Math.max(cw / iw, ch / ih), w = iw * sc, h = ih * sc;
+    ctx.drawImage(img, (cw - w) / 2, (ch - h) / 2, w, h);
   }
 
   // ----- 스크롤 진행도 / 고정(pin) / 문구 -----
