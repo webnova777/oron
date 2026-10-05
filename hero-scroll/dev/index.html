@@ -8,10 +8,12 @@
   html, body { margin: 0; background: #FBFAF8; font-family: 'Montserrat', 'Space Grotesk', sans-serif; }
   .mock { display: grid; place-items: center; height: 70vh; text-align: center; color: #363636; }
   .mock h2 { font-size: 40px; margin: 0 0 8px; }
-  a.btn { text-decoration: none; }
+  /* 아임웹 상단 고정 메뉴를 흉내 낸 막대 (영상이 메뉴에 가려지는지 확인용) */
+  .mock-nav { position: fixed; left: 24px; right: 24px; top: 8px; height: 64px; background: #fff; border-radius: 32px; z-index: 50; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
 </style>
 </head>
 <body>
+  <div class="mock-nav"></div>
   <section class="mock"><div><h2>HEADER (아임웹 다른 섹션)</h2><p>아래로 스크롤하면 히어로가 고정되어 영상이 재생됩니다.</p></div></section>
 
   <div id="mount"></div>

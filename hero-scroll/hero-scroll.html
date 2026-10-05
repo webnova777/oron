@@ -161,13 +161,15 @@
   // ===== 설정 (여기만 바꾸면 됩니다) =====
   var DEFAULTS = {
     base: 'https://cdn.jsdelivr.net/gh/webnova777/oron@a7616cc9276b7cfad8ab4b5d01c548cb383d2853/hero-scroll/frames/', // 프레임 이미지 폴더 주소(끝에 / 포함, 커밋 고정)
-    count: 301,            // 프레임 총 개수 (0001.webp ~ 0301.webp)
+    count: 241,            // 프레임 총 개수 (0001.webp ~ 0241.webp)
     ext: 'webp',
     videoEnd: 0.64,        // 스크롤 진행도 0~이 값 사이에 영상 재생, 이후는 마지막 프레임 유지
     steps: [0.70, 0.78, 0.86, 0.94], // 문구 등장 시점: 소개문 → GOOD PRODUCTS. → NEW MARKET. → 버튼
     mobileVisible: 0.68,   // 세로 화면에서 영상 가로의 몇 %를 보여줄지 (제품이 있는 가운데 부분)
     mobileFocusX: 0.53,    // 보여줄 부분의 중심 (0=왼쪽 끝, 1=오른쪽 끝)
-    mobileCenterY: 0.34    // 영상이 놓일 세로 위치 (0=맨 위, 1=맨 아래)
+    mobileCenterY: 0.34,   // 영상이 놓일 세로 위치 (0=맨 위, 1=맨 아래)
+    topInset: 80,          // 상단에 고정된 아임웹 메뉴 높이(px). 메뉴에 영상이 가려지지 않게 그만큼 비워요
+    maxCoverAspect: 1.8    // 화면이 이 가로세로 비율보다 넓으면 위아래가 잘리지 않게 영상 전체를 보여줘요
   };
   var cfg = Object.assign({}, DEFAULTS, window.ORON_HERO_CONFIG || {});
 
@@ -190,7 +192,7 @@
   var loadedCount = 0;
   var target = 0, current = 0;     // 목표 프레임 / 현재 프레임(부드럽게 따라감)
   var lastDrawn = -1, progress = 0;
-  var cw = 0, ch = 0;
+  var cw = 0, ch = 0, dprNow = 1;
 
   function pad(i) { var s = String(i + 1); while (s.length < 4) s = '0' + s; return s; }
   function ok(img) { return img && img.complete && img.naturalWidth > 0; }
@@ -229,7 +231,7 @@
 
   // ----- 캔버스 크기 / 그리기 -----
   function resize() {
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var dpr = dprNow = Math.min(window.devicePixelRatio || 1, 2);
     var r = stage.getBoundingClientRect();
     var w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
     if (w !== cw || h !== ch) { cw = canvas.width = w; ch = canvas.height = h; lastDrawn = -1; }
@@ -263,9 +265,22 @@
       ctx.fillRect(0, 0, cw, Math.max(0, dy)); ctx.fillRect(0, dy + dh, cw, ch - dy - dh);
       return;
     }
-    // 가로 화면: 화면을 가득 채우기(cover)
-    var sc = Math.max(cw / iw, ch / ih), w2 = iw * sc, h2 = ih * sc;
-    ctx.drawImage(img, (cw - w2) / 2, (ch - h2) / 2, w2, h2);
+    // 가로 화면: 상단 메뉴 아래 영역에 맞춰 그리기
+    var inset = cfg.topInset * dprNow, availH = Math.max(1, ch - inset);
+    var sc = Math.max(cw / iw, availH / ih);                       // 기본: 영역을 가득 채움(cover)
+    if (cw / availH > cfg.maxCoverAspect) sc = availH / ih;        // 너무 넓은 화면: 위아래가 잘리지 않게 높이에 맞춤
+    var w2 = iw * sc, h2 = ih * sc, dx = (cw - w2) / 2, dy = inset + (availH - h2) / 2;
+    ctx.drawImage(img, dx, dy, w2, h2);
+    if (dx > 0) {                                                  // 좌우에 남는 공간은 배경색으로, 경계는 부드럽게
+      var edge = w2 * 0.06;
+      ctx.fillStyle = '#FBFAF8';
+      ctx.fillRect(0, 0, dx, ch); ctx.fillRect(dx + w2, 0, dx + 1, ch);
+      [[dx, dx + edge], [dx + w2, dx + w2 - edge]].forEach(function (g) {
+        var grad = ctx.createLinearGradient(g[0], 0, g[1], 0);
+        grad.addColorStop(0, 'rgba(251,250,248,1)'); grad.addColorStop(1, 'rgba(251,250,248,0)');
+        ctx.fillStyle = grad; ctx.fillRect(Math.min(g[0], g[1]), 0, edge, ch);
+      });
+    }
   }
 
   // ----- 스크롤 진행도 / 화면 고정(pin) / 문구 등장 -----
