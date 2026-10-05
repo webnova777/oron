@@ -17,8 +17,10 @@
     --oron-ink: #363636;                /* 글자(소프트 차콜) */
     --oron-dark: #15181E;               /* 버튼 */
     --oron-grad: linear-gradient(90deg, #8FE3B0 0%, #F3E58A 52%, #F5A9C8 100%); /* 로고 그라데이션 */
+    --oron-pull-up: 0px;                /* 히어로를 위로 끌어올릴 높이. 상단에 흰 띠가 보이면 67px 처럼 키우세요 */
     position: relative;
     width: 100%;
+    margin-top: calc(var(--oron-pull-up) * -1);
     height: 600vh;
     background: var(--oron-bg);
     color: var(--oron-ink);
@@ -89,7 +91,7 @@
   }
   #oron-hero .oron-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(21,24,30,.18); }
 
-  /* ---------- 스크롤 안내 / 진행 바 / 로딩 바 ---------- */
+  /* ---------- 스크롤 안내 / 진행 바 ---------- */
   #oron-hero .oron-hint {
     position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 2;
     font-size: 11px; font-weight: 600; line-height: 1; letter-spacing: .3em;
@@ -105,11 +107,6 @@
   #oron-hero .oron-progress {          /* 아래쪽 그라데이션 진행 바 */
     position: absolute; left: 0; bottom: 0; height: 4px; width: 100%; z-index: 3;
     background: var(--oron-grad); transform: scaleX(0); transform-origin: left center;
-  }
-  #oron-hero .oron-loading {           /* 위쪽 프레임 로딩 바 */
-    position: absolute; left: 0; top: 0; height: 3px; width: 100%; z-index: 4;
-    background: var(--oron-ink); opacity: .35; transform: scaleX(0); transform-origin: left center;
-    transition: opacity .4s ease;
   }
 
   /* ---------- 모바일(세로 화면): 영상은 위쪽, 문구는 아래쪽 ---------- */
@@ -133,7 +130,6 @@
 <div id="oron-hero" aria-label="ORON 소개">
   <div class="oron-stage">
     <canvas class="oron-canvas" aria-hidden="true"></canvas>
-    <div class="oron-loading"></div>
 
     <!-- 문구: 스크롤에 맞춰 위에서부터 하나씩 나타남 (제목 태그 대신 div 사용) -->
     <div class="oron-copy">
@@ -182,7 +178,6 @@
   var ctx = canvas.getContext('2d');
   var hint = root.querySelector('.oron-hint');
   var bar = root.querySelector('.oron-progress');
-  var loadingBar = root.querySelector('.oron-loading');
   var steps = Array.prototype.slice.call(root.querySelectorAll('.oron-step')); // 등장 순서대로
   var accent = root.querySelector('.oron-accent');
 
@@ -208,22 +203,28 @@
   }
   function loadFrames() {
     var order = loadOrder(), pos = 0, active = 0, MAX = 6;   // 동시에 6장씩
+    function one(i, tries, done) {
+      var img = new Image(), finished = false, timer;
+      function end(good) {
+        if (finished) return; finished = true; clearTimeout(timer);
+        if (good) { loaded[i] = img; done(); }
+        else if (tries < 2) one(i, tries + 1, done);          // 실패하면 다시 시도(최대 2번)
+        else done();                                          // 그래도 안 되면 포기(가까운 프레임으로 대신 그림)
+      }
+      img.decoding = 'async';
+      img.onload = function () { end(ok(img)); };
+      img.onerror = function () { end(false); };
+      timer = setTimeout(function () { img.src = ''; end(false); }, 12000);   // 응답이 없으면 12초 뒤 포기
+      img.src = cfg.base + pad(i) + '.' + cfg.ext + (tries ? '?r=' + tries : '');
+    }
     function next() {
       while (active < MAX && pos < order.length) {
-        (function (i) {
-          active++;
-          var img = new Image();
-          img.decoding = 'async';
-          img.onload = img.onerror = function () {
-            if (ok(img)) loaded[i] = img;
-            loadedCount++; active--;
-            loadingBar.style.transform = 'scaleX(' + (loadedCount / N) + ')';
-            if (loadedCount >= N) loadingBar.style.opacity = 0;
-            lastDrawn = -1;               // 새로 받은 프레임으로 다시 그리기
-            next();
-          };
-          img.src = cfg.base + pad(i) + '.' + cfg.ext;
-        })(order[pos++]);
+        active++;
+        one(order[pos++], 0, function () {
+          active--; loadedCount++;
+          lastDrawn = -1;                 // 새로 받은 프레임으로 다시 그리기
+          next();
+        });
       }
     }
     next();
@@ -271,8 +272,14 @@
     if (cw / availH > cfg.maxCoverAspect) sc = availH / ih;        // 너무 넓은 화면: 위아래가 잘리지 않게 높이에 맞춤
     var w2 = iw * sc, h2 = ih * sc, dx = (cw - w2) / 2, dy = inset + (availH - h2) / 2;
     ctx.drawImage(img, dx, dy, w2, h2);
+    if (dy > 0) {                                                  // 위쪽 경계: 메뉴 아래 영상 시작 부분을 배경색으로 부드럽게
+      var topFade = ctx.createLinearGradient(0, dy, 0, dy + h2 * 0.16);
+      topFade.addColorStop(0, 'rgba(251,250,248,1)'); topFade.addColorStop(1, 'rgba(251,250,248,0)');
+      ctx.fillStyle = '#FBFAF8'; ctx.fillRect(0, 0, cw, dy);
+      ctx.fillStyle = topFade; ctx.fillRect(0, dy, cw, h2 * 0.16);
+    }
     if (dx > 0) {                                                  // 좌우에 남는 공간은 배경색으로, 경계는 부드럽게
-      var edge = w2 * 0.06;
+      var edge = w2 * 0.12;
       ctx.fillStyle = '#FBFAF8';
       ctx.fillRect(0, 0, dx, ch); ctx.fillRect(dx + w2, 0, dx + 1, ch);
       [[dx, dx + edge], [dx + w2, dx + w2 - edge]].forEach(function (g) {
