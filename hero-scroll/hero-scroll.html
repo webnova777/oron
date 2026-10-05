@@ -1,0 +1,329 @@
+<!--
+  ORON · 3D 스크롤 히어로 (아임웹 코드 위젯용)
+  - 스크롤 → 캔버스 프레임 시퀀스 재생(스크럽) + Lenis 부드러운 스크롤
+  - 문구는 스크롤 진행도에 맞춰 하나씩 등장 (위로 올리면 반대로 사라짐)
+  - 아래 ORON_HERO_CONFIG 의 base(프레임 폴더 주소)와 count(프레임 수)만 맞추면 됩니다.
+-->
+<style>
+  html.lenis, html.lenis body { height: auto; }
+  .lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+  #oron-hero {
+    --oron-bg: #FBFAF8;
+    --oron-ink: #363636;
+    --oron-dark: #15181E;
+    --oron-grad: linear-gradient(90deg, #8FE3B0 0%, #F3E58A 52%, #F5A9C8 100%);
+    position: relative;
+    width: 100%;
+    height: 600vh;
+    background: var(--oron-bg);
+    color: var(--oron-ink);
+  }
+  #oron-hero .oron-stage {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 100vh; height: 100svh;
+    overflow: hidden;
+    background: var(--oron-bg);
+  }
+  #oron-hero .oron-stage.is-pinned { position: fixed; top: 0; bottom: auto; }
+  #oron-hero .oron-stage.is-after  { position: absolute; top: auto; bottom: 0; }
+
+  #oron-hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* 모바일에서 글자가 읽히도록 아래쪽에 옅은 막 */
+  #oron-hero .oron-veil { position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to top, rgba(251,250,248,.92) 0%, rgba(251,250,248,.7) 30%, rgba(251,250,248,0) 62%);
+    opacity: 0; }
+
+  /* ---- 문구 영역 ---- */
+  #oron-hero .oron-copy {
+    position: absolute; z-index: 2;
+    left: clamp(24px, 6vw, 112px); top: 50%; transform: translateY(-50%);
+    width: min(48vw, 760px);
+    text-align: left;
+    font-family: 'Montserrat', 'Space Grotesk', 'SUITE', sans-serif;
+  }
+  #oron-hero .oron-copy h1,
+  #oron-hero .oron-copy p { margin: 0; text-align: left !important; }
+
+  #oron-hero .oron-copy [style*="font-size: 24px"] {
+    font-size: clamp(14px, 1.45vw, 22px) !important; font-weight: 500; letter-spacing: -.01em; line-height: 1.5;
+  }
+  #oron-hero .oron-copy [style*="font-size: 96px"] {
+    font-size: clamp(34px, 5.2vw, 84px) !important; line-height: 1.04; letter-spacing: -.025em; font-weight: 800;
+  }
+
+  /* 하나씩 등장: 시작은 숨김 → is-in 이 붙으면 나타남 */
+  #oron-hero .oron-step {
+    opacity: 0 !important; transform: translate3d(0, 28px, 0) !important;
+    transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1) !important;
+    will-change: opacity, transform;
+  }
+  #oron-hero .oron-step.is-in { opacity: 1 !important; transform: translate3d(0, 0, 0) !important; }
+  #oron-hero .oron-spacer { display: none !important; }
+  #oron-hero #hero-title { margin: 14px 0 28px; }
+
+  /* NEW MARKET. 아래 로고 그라데이션 라인 */
+  #oron-hero .oron-line-accent { position: relative; display: inline-block; padding-bottom: 12px; }
+  #oron-hero .oron-line-accent::after {
+    content: ""; position: absolute; left: 0; bottom: 0; height: 6px; width: 100%;
+    background: var(--oron-grad); border-radius: 3px;
+    transform: scaleX(0); transform-origin: left center;
+    transition: transform .9s cubic-bezier(.2,.7,.2,1) .25s;
+  }
+  #oron-hero .oron-line-accent.is-in::after { transform: scaleX(1); }
+
+  /* 버튼 */
+  #oron-hero #hero-btn .btn {
+    display: inline-block; padding: 16px 36px; border-radius: 4px; border: 0;
+    background: var(--oron-dark); color: #fff !important; font-weight: 700; letter-spacing: .08em; text-decoration: none;
+    position: relative; transition: transform .25s ease, box-shadow .25s ease;
+  }
+  #oron-hero #hero-btn .btn::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; border-radius: 0 0 4px 4px; background: var(--oron-grad);
+  }
+  #oron-hero #hero-btn .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(21,24,30,.18); }
+
+  /* 스크롤 안내 + 진행 바 */
+  #oron-hero .oron-hint {
+    position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%);
+    font: 600 11px/1 'Montserrat', 'Space Grotesk', sans-serif; letter-spacing: .3em; color: var(--oron-ink);
+    transition: opacity .4s ease; z-index: 2;
+  }
+  #oron-hero .oron-hint::after { content: ""; display: block; width: 1px; height: 34px; margin: 10px auto 0; background: var(--oron-ink); opacity: .5;
+    animation: oron-drip 1.6s ease-in-out infinite; transform-origin: top; }
+  @keyframes oron-drip { 0% { transform: scaleY(0); } 60% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+  #oron-hero .oron-progress { position: absolute; left: 0; bottom: 0; height: 4px; width: 100%; background: var(--oron-grad);
+    transform: scaleX(0); transform-origin: left center; z-index: 3; }
+
+  /* 프레임 로딩 표시 */
+  #oron-hero .oron-loading { position: absolute; left: 0; top: 0; height: 3px; width: 100%; background: var(--oron-ink);
+    transform: scaleX(0); transform-origin: left; opacity: .35; z-index: 4; transition: opacity .4s ease; }
+
+  /* ---- 모바일: 문구를 아래로 ---- */
+  @media (max-width: 820px) {
+    #oron-hero .oron-veil { opacity: 1; }
+    #oron-hero .oron-copy { left: 20px; right: 20px; width: auto; top: auto; bottom: 64px; transform: none; text-align: center; }
+    #oron-hero .oron-copy h1, #oron-hero .oron-copy p { text-align: center !important; }
+    #oron-hero .oron-copy [style*="font-size: 96px"] { font-size: clamp(28px, 9vw, 48px) !important; }
+    #oron-hero #hero-title { margin: 8px 0 18px; }
+    #oron-hero #hero-btn .btn { padding: 14px 30px; }
+  }
+
+  /* 모션 줄이기 설정: 정지 화면 + 문구 모두 표시 */
+  @media (prefers-reduced-motion: reduce) {
+    #oron-hero { height: 100svh; }
+    #oron-hero .oron-step { opacity: 1 !important; transform: none !important; transition: none !important; }
+    #oron-hero .oron-line-accent::after { transform: scaleX(1); transition: none; }
+    #oron-hero .oron-hint, #oron-hero .oron-progress { display: none; }
+  }
+</style>
+
+<section id="oron-hero" aria-label="ORON 소개">
+  <div class="oron-stage">
+    <canvas id="oron-hero-canvas" aria-hidden="true"></canvas>
+    <div class="oron-veil"></div>
+    <div class="oron-loading"></div>
+
+    <div class="oron-copy">
+      <div class="fade-up-item oron-step" id="hero-sub">
+
+        <h1 style="text-align: center;"><span style="font-size: 24px;">좋은 제품을 발견하고, 새로운 시장을 만듭니다.</span><span style="font-size: 24px;">&nbsp;</span></h1>
+      </div>
+      <div class="fade-up-item" id="hero-title">
+
+        <p style="text-align: center;" class="oron-step"><span style="font-size: 96px;"><strong>GOOD PRODUCTS.</strong></span></p>
+
+        <p style="text-align: center;" class="oron-step"><span class="oron-line-accent"><span style="font-size: 96px;"><strong>NEW MARKET.</strong></span></span></p>
+
+        <p style="text-align: center;">
+          <br>
+        </p>
+
+        <p style="text-align: center;">
+          <br>
+        </p>
+      </div>
+
+      <p style="text-align: center;">
+        <br>
+      </p>
+      <div class="fade-up-item oron-step" id="hero-btn">
+
+        <p style="text-align: center;"><a class="btn btn-md" href="/#s20260908368a1818aacdd">CONTACT</a></p>
+      </div>
+    </div>
+
+    <div class="oron-hint">SCROLL</div>
+    <div class="oron-progress"></div>
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  // ===== 설정 (여기만 바꾸면 됩니다) =====
+  var DEFAULTS = {
+    base: 'https://cdn.jsdelivr.net/gh/webnova777/oron@main/hero-scroll/frames/', // 프레임 이미지 폴더 주소(끝에 / 포함)
+    count: 144,            // 프레임 총 개수 (0001.webp ~ 0144.webp)
+    ext: 'webp',
+    videoEnd: 0.64,        // 스크롤 진행도 0~이 값 사이에 영상 재생, 이후는 마지막 프레임 유지
+    steps: [0.70, 0.78, 0.86, 0.94], // 문구 등장 시점: 소개문 → GOOD PRODUCTS. → NEW MARKET. → 버튼
+    mobileFocusX: 0.72,    // 세로 화면에서 영상의 어느 쪽을 보여줄지 (0=왼쪽, 1=오른쪽)
+    lenisSrc: 'https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js'
+  };
+  var cfg = Object.assign({}, DEFAULTS, window.ORON_HERO_CONFIG || {});
+
+  var root = document.getElementById('oron-hero');
+  if (!root || root.__oronInit) return;
+  root.__oronInit = true;
+
+  var stage = root.querySelector('.oron-stage');
+  var canvas = root.querySelector('#oron-hero-canvas');
+  var ctx = canvas.getContext('2d');
+  var hint = root.querySelector('.oron-hint');
+  var bar = root.querySelector('.oron-progress');
+  var loadingBar = root.querySelector('.oron-loading');
+  var steps = Array.prototype.slice.call(root.querySelectorAll('.oron-step'));
+  var accent = root.querySelector('.oron-line-accent');
+  Array.prototype.forEach.call(root.querySelectorAll('.oron-copy p'), function (p) {
+    if (!p.classList.contains('oron-step') && !p.textContent.trim() && !p.querySelector('a')) p.classList.add('oron-spacer');
+  });
+
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var N = cfg.count;
+  var loaded = new Array(N);
+  var loadedCount = 0;
+  var target = 0, current = 0, lastDrawn = -1, progress = 0;
+  var cw = 0, ch = 0;
+
+  function pad(i) { var s = String(i + 1); while (s.length < 4) s = '0' + s; return s; }
+  function ok(img) { return img && img.complete && img.naturalWidth > 0; }
+
+  // ----- 프레임 불러오기: 처음·끝 → 듬성듬성 → 나머지 순서 -----
+  function loadOrder() {
+    var order = [0, N - 1], seen = {}; seen[0] = seen[N - 1] = 1;
+    [12, 4, 1].forEach(function (stride) {
+      for (var i = 0; i < N; i += stride) if (!seen[i]) { seen[i] = 1; order.push(i); }
+    });
+    return order;
+  }
+  function loadFrames() {
+    var order = loadOrder(), pos = 0, active = 0, MAX = 6;
+    function next() {
+      while (active < MAX && pos < order.length) {
+        (function (i) {
+          active++;
+          var img = new Image();
+          img.decoding = 'async';
+          img.onload = img.onerror = function () {
+            if (ok(img)) loaded[i] = img;
+            loadedCount++; active--;
+            loadingBar.style.transform = 'scaleX(' + (loadedCount / N) + ')';
+            if (loadedCount >= N) loadingBar.style.opacity = 0;
+            lastDrawn = -1; // 새로 받은 프레임으로 다시 그리기
+            next();
+          };
+          img.src = cfg.base + pad(i) + '.' + cfg.ext;
+        })(order[pos++]);
+      }
+    }
+    next();
+  }
+
+  // ----- 캔버스 -----
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var r = stage.getBoundingClientRect();
+    var w = Math.max(1, Math.round(r.width * dpr)), h = Math.max(1, Math.round(r.height * dpr));
+    if (w !== cw || h !== ch) { cw = canvas.width = w; ch = canvas.height = h; lastDrawn = -1; }
+  }
+  function draw(idx) {
+    var img = loaded[idx];
+    if (!ok(img)) {
+      img = null;
+      for (var d = 1; d < N; d++) {
+        if (ok(loaded[idx - d])) { img = loaded[idx - d]; break; }
+        if (ok(loaded[idx + d])) { img = loaded[idx + d]; break; }
+      }
+    }
+    if (!img) return;
+    var iw = img.naturalWidth, ih = img.naturalHeight;
+    var s = Math.max(cw / iw, ch / ih), dw = iw * s, dh = ih * s;
+    var fx = cw < ch ? cfg.mobileFocusX : 0.5;
+    ctx.fillStyle = '#FBFAF8'; ctx.fillRect(0, 0, cw, ch);
+    ctx.drawImage(img, (cw - dw) * fx, (ch - dh) * 0.5, dw, dh);
+  }
+
+  // ----- 스크롤 진행도 / 고정(pin) / 문구 -----
+  function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
+  function update() {
+    var r = root.getBoundingClientRect();
+    var vh = window.innerHeight;
+    var range = Math.max(1, r.height - vh);
+    progress = clamp(-r.top / range, 0, 1);
+
+    var state = r.top > 0 ? 'before' : (r.bottom < vh ? 'after' : 'pinned');
+    stage.classList.toggle('is-pinned', state === 'pinned');
+    stage.classList.toggle('is-after', state === 'after');
+
+    target = clamp(progress / cfg.videoEnd, 0, 1) * (N - 1);
+
+    steps.forEach(function (el, i) { el.classList.toggle('is-in', progress >= cfg.steps[Math.min(i, cfg.steps.length - 1)]); });
+    if (accent) accent.classList.toggle('is-in', progress >= cfg.steps[2]);
+    hint.style.opacity = progress < 0.03 ? 1 : 0;
+    bar.style.transform = 'scaleX(' + progress + ')';
+  }
+
+  // ----- 매 프레임: 부드럽게 따라가며 그리기 -----
+  function tick() {
+    current += (target - current) * 0.2;
+    if (Math.abs(target - current) < 0.01) current = target;
+    var idx = clamp(Math.round(current), 0, N - 1);
+    if (idx !== lastDrawn) { draw(idx); lastDrawn = idx; }
+    requestAnimationFrame(tick);
+  }
+
+  // ----- Lenis -----
+  function startLenis() {
+    var Lenis = window.Lenis;
+    if (!Lenis) return false;
+    var lenis = window.__oronLenis;
+    if (!lenis) {
+      lenis = window.__oronLenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+      (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(performance.now());
+    }
+    lenis.on('scroll', update);   // Lenis 스크롤 위치와 프레임 계산 동기화
+    return true;
+  }
+  function loadLenis(cb) {
+    if (window.Lenis) return cb();
+    var s = document.createElement('script');
+    s.src = cfg.lenisSrc; s.async = true;
+    s.onload = s.onerror = cb;     // 실패해도 기본 스크롤로 동작
+    document.head.appendChild(s);
+  }
+
+  // ----- 시작 -----
+  resize();
+  window.addEventListener('resize', function () { resize(); update(); });
+  loadFrames();
+
+  if (reduce) {
+    target = current = N - 1;
+    steps.forEach(function (el) { el.classList.add('is-in'); });
+    resize(); lastDrawn = -1;
+    var t = setInterval(function () { if (ok(loaded[N - 1])) { draw(N - 1); clearInterval(t); } }, 120);
+    return;
+  }
+
+  update();
+  loadLenis(function () {
+    startLenis();
+    window.addEventListener('scroll', update, { passive: true }); // Lenis 없을 때도 동작
+    update();
+  });
+  requestAnimationFrame(tick);
+})();
+</script>
