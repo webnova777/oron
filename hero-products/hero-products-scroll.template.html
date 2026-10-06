@@ -1,10 +1,10 @@
 <!--
   ORON · 제품 3개 마스크 리빌 스크롤 히어로 (아임웹 코드 위젯 삽입용)
   - html / head / body 없이 HTML + CSS + JavaScript 만 사용합니다. (외부 라이브러리·폰트 없음)
-  - 스크롤을 내리면 색 띠가 펼쳐지고, 제품 3개가 하나씩 자기 띠의 아래쪽 경계선 밖에서 올라오며 드러납니다.
+  - 스크롤을 내리면 색 띠가 펼쳐지고, 띠마다 패키지가 자기 띠의 아래쪽 경계선 밖에서 올라오며 드러나고(아래쪽은 살짝 가려짐), 반대쪽에서 과자 실물이 뿅 하고 나타납니다.
   - 제품이 다 나타나면 바탕에 어두운 오버레이가 깔리고, 문구와 버튼이 하나씩 나타납니다.
   - 위로 올리면 모든 것이 거꾸로 되돌아갑니다.
-  - 제품 이미지는 아래 스크립트의 DEFAULTS.base 주소에서 불러옵니다. (이 파일은 build-widget.py 로 만들어집니다)
+  - 제품·과자 이미지는 아래 스크립트의 DEFAULTS.base 주소에서 불러옵니다. (이 파일은 build-widget.py 로 만들어집니다)
   - 사용 위치: 아임웹 "전체 폭 · 여백 0" 섹션 안의 코드 위젯
 -->
 <style>
@@ -191,7 +191,7 @@
   var COMPOSE = window.ORON_COMPOSE;
 
   // ----- 제품 이미지 불러오기 (실패하면 최대 2번 다시 시도) -----
-  var FILES = { guoba: 'guoba-red.png', banana: 'banana.png', sesame: 'sesame.png' };
+  var FILES = { guobaY: 'guoba-yellow.png', guobaR: 'guoba-red.png', chips: 'chips.png', banana: 'banana.png', candy: 'banana-candy.png', sesame: 'sesame.png', balls: 'sesame-balls.png' };
   function loadImage(key, tries) {
     var img = new Image();
     img.onload = function () { images[key] = img; lastDrawn = -1; };
@@ -260,7 +260,7 @@
     overlay.style.opacity = 1;
     steps.forEach(function (el) { el.classList.add('oronp-is-in'); });
     if (accent) accent.classList.add('oronp-is-in');
-    var t = setInterval(function () { if (images.guoba && images.banana && images.sesame) { COMPOSE.render(ctx, images, COMPOSE.DURATION); clearInterval(t); } }, 120);
+    var t = setInterval(function () { if (Object.keys(FILES).every(function (k) { return images[k]; })) { COMPOSE.render(ctx, images, COMPOSE.DURATION); clearInterval(t); } }, 120);
     return;
   }
 
