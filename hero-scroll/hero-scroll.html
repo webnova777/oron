@@ -17,10 +17,8 @@
     --oron-ink: #363636;                /* 글자(소프트 차콜) */
     --oron-dark: #15181E;               /* 버튼 */
     --oron-grad: linear-gradient(90deg, #8FE3B0 0%, #F3E58A 52%, #F5A9C8 100%); /* 로고 그라데이션 */
-    --oron-pull-up: 0px;                /* 히어로를 위로 끌어올릴 높이. 상단에 흰 띠가 보이면 67px 처럼 키우세요 */
     position: relative;
     width: 100%;
-    margin-top: calc(var(--oron-pull-up) * -1);
     height: 600vh;
     background: var(--oron-bg);
     color: var(--oron-ink);
@@ -164,6 +162,7 @@
     mobileVisible: 0.68,   // 세로 화면에서 영상 가로의 몇 %를 보여줄지 (제품이 있는 가운데 부분)
     mobileFocusX: 0.53,    // 보여줄 부분의 중심 (0=왼쪽 끝, 1=오른쪽 끝)
     mobileCenterY: 0.34,   // 영상이 놓일 세로 위치 (0=맨 위, 1=맨 아래)
+    pullUp: 'auto',        // 'auto' = 히어로가 페이지 맨 위에 있으면 상단 흰 띠(메뉴 높이만큼의 여백)만큼 자동으로 끌어올림 / 숫자(px) / 0 = 사용 안 함
     topInset: 80,          // 상단에 고정된 아임웹 메뉴 높이(px). 메뉴에 영상이 가려지지 않게 그만큼 비워요
     maxCoverAspect: 1.8    // 화면이 이 가로세로 비율보다 넓으면 위아래가 잘리지 않게 영상 전체를 보여줘요
   };
@@ -321,9 +320,19 @@
     requestAnimationFrame(tick);
   }
 
+  // ----- 상단 흰 띠 제거: 아임웹이 첫 섹션 위에 메뉴 높이만큼 남겨 둔 여백을 히어로가 덮도록 끌어올림 -----
+  function pullUp() {
+    var cur = parseFloat(root.style.marginTop) || 0;                     // 지금 적용된 값(음수)
+    var top = root.getBoundingClientRect().top + window.scrollY - cur;   // 끌어올리기 전의 페이지 위쪽 거리
+    var want = cfg.pullUp === 'auto' ? (top > 0 && top <= 120 ? top : 0) : (Number(cfg.pullUp) || 0);
+    root.style.marginTop = want ? (-want + 'px') : '';
+  }
+
   // ----- 시작 -----
+  pullUp();
+  window.addEventListener('load', function () { pullUp(); resize(); update(); });
   resize();
-  window.addEventListener('resize', function () { resize(); update(); });
+  window.addEventListener('resize', function () { pullUp(); resize(); update(); });
   loadFrames();
 
   if (reduce) {            // 동작 줄이기: 마지막 프레임만 보여주고 문구는 모두 표시
