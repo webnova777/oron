@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ORON 제품 히어로 로컬 테스트</title>
+<style>
+  html, body { margin: 0; background: #FBFAF8; font-family: 'Montserrat', 'Space Grotesk', sans-serif; }
+  .mock { display: grid; place-items: center; height: 70vh; text-align: center; color: #363636; background: #fff; }
+  /* 아임웹 상단 메뉴를 흉내 낸 바 (제품이 메뉴에 가려지는지 확인용) */
+  .mock-nav { position: fixed; left: 24px; right: 24px; top: 8px; height: 64px; background: #fff; border-radius: 32px; z-index: 50; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+</style>
+</head>
+<body>
+  <div class="mock-nav"></div>
+  <!-- 아임웹 겹침 메뉴 때문에 첫 섹션 위에 메뉴 높이(66px)만큼 흰 여백이 남는 상황을 흉내 -->
+  <div style="padding-top:66px;background:#fff"><div id="mount"></div></div>
+  <section class="mock"><div><h2>NEXT SECTION</h2><p>히어로가 끝나면 이 섹션이 이어집니다.</p></div></section>
+<script>
+  window.ORON_HERO_CONFIG = { base: '../assets/' };   // 로컬 테스트: 제품 이미지는 한 칸 위(../assets/)
+  fetch('../hero-products-scroll.html').then(function (r) { return r.text(); }).then(function (html) {
+    document.getElementById('mount').appendChild(document.createRange().createContextualFragment(html));
+  });
+</script>
+</body>
+</html>

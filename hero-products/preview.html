@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>제품 3개 마스크 리빌 · 미리보기</title>
+<style>
+  body { margin: 0; background: #222; color: #fff; font: 14px sans-serif; }
+  canvas { width: 100%; display: block; background: #000; }
+  .bar { padding: 10px 16px; display: flex; gap: 12px; align-items: center; }
+  input[type=range] { flex: 1; }
+</style>
+</head>
+<body>
+<canvas id="cv" width="1920" height="1080"></canvas>
+<div class="bar"><button id="play">재생</button><input id="t" type="range" min="0" max="600" value="0"><span id="lab">0.00s</span></div>
+<script src="compose.js"></script>
+<script>
+  // 제품 이미지를 불러온 뒤 t(초) 시점의 장면을 그립니다. (render-frames.js 도 같은 함수를 씁니다)
+  var names = { guoba: 'assets/guoba-red.png', banana: 'assets/banana.png', sesame: 'assets/sesame.png' };
+  var images = {}, left = 3;
+  Object.keys(names).forEach(function (k) {
+    var im = new Image(); im.onload = function () { images[k] = im; if (!--left) { window.READY = true; draw(0); } };
+    im.src = names[k];
+  });
+  var ctx = document.getElementById('cv').getContext('2d');
+  window.drawAt = function (t) { ORON_COMPOSE.render(ctx, images, t); };
+  function draw(t) { drawAt(t); document.getElementById('lab').textContent = t.toFixed(2) + 's'; }
+  var range = document.getElementById('t');
+  range.oninput = function () { draw(range.value / 100); };
+  var timer;
+  document.getElementById('play').onclick = function () {
+    if (timer) { clearInterval(timer); timer = null; return; }
+    var t = 0; timer = setInterval(function () { t += 1 / 30; if (t > ORON_COMPOSE.DURATION) t = 0; range.value = t * 100; draw(t); }, 1000 / 30);
+  };
+</script>
+</body>
+</html>
