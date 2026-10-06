@@ -13,6 +13,7 @@
 <body>
 <canvas id="cv" width="1920" height="1080"></canvas>
 <div class="bar"><button id="play">재생</button><input id="t" type="range" min="0" max="600" value="0"><span id="lab">0.00s</span></div>
+<script>window.ORON_GLOW = /glow/.test(location.search);</script>
 <script src="compose.js"></script>
 <script>
   // 제품 이미지를 불러온 뒤 t(초) 시점의 장면을 그립니다. (render-frames.js 도 같은 함수를 씁니다)

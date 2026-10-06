@@ -81,19 +81,8 @@
   function easeOutBack(p) { var c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); }  // 살짝 튀어 오르는 효과
   function seg(t, start, dur) { return clamp((t - start) / dur, 0, 1); }
 
-  // ----- 종이 질감(고정 노이즈): 한 번만 만들어 재사용 -----
-  var grain = null;
-  function makeGrain() {
-    var c = document.createElement('canvas'); c.width = 256; c.height = 256;
-    var g = c.getContext('2d'), d = g.createImageData(256, 256), seed = 1234567;
-    for (var i = 0; i < d.data.length; i += 4) {
-      seed = (seed * 1664525 + 1013904223) >>> 0;          // 항상 같은 결과가 나오는 난수
-      var v = (seed >>> 24);
-      d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 255;
-    }
-    g.putImageData(d, 0, 0);
-    return c;
-  }
+  // 질감 없이 매끈한 단색 띠. window.ORON_GLOW = true 이면 띠마다 은은한 빛 번짐을 얹음
+  var GLOW = !!(root.ORON_GLOW);
 
   // ----- 띠 하나 그리기: 폴리곤 + 아래로 떨어지는 부드러운 그림자 -----
   function drawBand(g, L, color, top, bottom, reveal, fromRight) {
@@ -109,6 +98,16 @@
     g.moveTo(x0, top(x0)); g.lineTo(x1, top(x1)); g.lineTo(x1, bottom(x1)); g.lineTo(x0, bottom(x0)); g.closePath();
     g.shadowColor = 'rgba(0,0,0,0.22)'; g.shadowBlur = 28 * L.scale; g.shadowOffsetY = 10 * L.scale;
     g.fillStyle = color; g.fill();
+    if (GLOW) {                                   // 은은한 빛 번짐: 왼쪽 위에서 비추는 부드러운 하이라이트 + 오른쪽 아래의 옅은 음영
+      g.shadowColor = 'transparent'; g.clip();
+      var cxm = L.vw / 2, yt = Math.max(top(cxm), 0), yb = Math.min(bottom(cxm), L.vh), ym = (yt + yb) / 2;
+      var r = Math.max(L.vw, L.vh) * 0.6, g1 = g.createRadialGradient(L.vw * 0.28, ym - 40, 0, L.vw * 0.28, ym - 40, r);
+      g1.addColorStop(0, 'rgba(255,255,255,0.34)'); g1.addColorStop(0.55, 'rgba(255,255,255,0.08)'); g1.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = g1; g.fillRect(x0, -300, x1 - x0, L.vh + 600);
+      var g2 = g.createRadialGradient(L.vw * 0.92, ym + 60, 0, L.vw * 0.92, ym + 60, r * 0.8);
+      g2.addColorStop(0, 'rgba(0,0,0,0.14)'); g2.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = g2; g.fillRect(x0, -300, x1 - x0, L.vh + 600);
+    }
     g.restore();
   }
 
@@ -150,7 +149,6 @@
   function render(ctx, images, t) {
     var cv = ctx.canvas, L = layout(cv.width, cv.height);
     L.time = t;
-    if (!grain) grain = makeGrain();
     ctx.save();
     ctx.setTransform(L.scale, 0, 0, L.scale, 0, 0);
     ctx.shadowColor = 'transparent';
@@ -163,15 +161,6 @@
     drawBand(ctx, L, COLORS.band3, L.lineB, function () { return L.vh + 300; }, r3, true);
     drawBand(ctx, L, COLORS.band2, L.lineA, L.lineB, r2, false);
     drawBand(ctx, L, COLORS.band1, function () { return -300; }, L.lineA, r1, true);
-
-    // 종이 질감 (화면 픽셀 기준으로 곱하기)
-    if (r1 > 0) {
-      ctx.save();
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.globalAlpha = 0.07; ctx.globalCompositeOperation = 'multiply';
-      ctx.fillStyle = ctx.createPattern(grain, 'repeat'); ctx.fillRect(0, 0, cv.width, cv.height);
-      ctx.restore();
-    }
 
     // 패키지와 과자: 배열 순서대로 겹쳐 그림
     L.items.forEach(function (p) {
