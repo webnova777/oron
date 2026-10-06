@@ -63,11 +63,11 @@
       L.lineA = function (x) { return vh2 * 0.34 + k * (x - cx2); };
       L.lineB = function (x) { return vh2 * 0.67 - k * (x - cx2); };
       L.items = [
-      { key: 'guobaPair', kind: 'rise', t: T.yellowBag, x: cx2 + 95, h: vh2 * 0.215, line: L.lineA, rot: L.slope + 0.02, hide: 0.2 },
-      { key: 'chips',   kind: 'pop',  t: T.chips,     x: cx2 - 215, y: L.lineA(cx2 - 215) - 10, h: vh2 * 0.07, rot: -0.10 },
-      { key: 'banana',  kind: 'rise', t: T.bananaBag, x: cx2 - 55, h: vh2 * 0.27, line: L.lineB, rot: -L.slope - 0.02, hide: 0.15 },
-      { key: 'candy',   kind: 'pop',  t: T.candy,     x: cx2 + 175, y: (L.lineA(cx2 + 175) + L.lineB(cx2 + 175)) / 2 + 5, h: vh2 * 0.095, rot: 0.06 },
-      { key: 'sesame',  kind: 'rise', t: T.sesameBag, x: cx2 + 100, h: vh2 * 0.285, line: null,    rot: 0.05,            hide: 0.16 },
+      { key: 'guobaPair', kind: 'rise', t: T.yellowBag, x: cx2 + 62, h: vh2 * 0.262, line: L.lineA, rot: L.slope + 0.02, hide: 0.2 },
+      { key: 'chips',   kind: 'pop',  t: T.chips,     x: cx2 - 238, y: L.lineA(cx2 - 238) - 4, h: vh2 * 0.062, rot: -0.10 },
+      { key: 'banana',  kind: 'rise', t: T.bananaBag, x: cx2 - 50, h: vh2 * 0.33, line: L.lineB, rot: -L.slope - 0.02, hide: 0.15 },
+      { key: 'candy',   kind: 'pop',  t: T.candy,     x: cx2 + 215, y: L.lineB(cx2 + 215) - 4, h: vh2 * 0.07, rot: 0.06 },
+      { key: 'sesame',  kind: 'rise', t: T.sesameBag, x: cx2 + 66, h: vh2 * 0.34, line: null,    rot: 0.05,            hide: 0.16 },
       { key: 'balls',   kind: 'pop',  t: T.balls,     x: cx2 - 215, y: vh2 - vh2 * 0.085, h: vh2 * 0.105, rot: -0.05 }
     ];
     }
