@@ -1,0 +1,51 @@
+<!--
+  ORON · 상단 메뉴(헤더) 코드 위젯용 CSS
+  - 기존에 쓰시던 둥근 메뉴 바 CSS + "스크롤 전에도 스크롤 후와 같은 모양" 추가분
+  - 아임웹 헤더의 코드 위젯 안 <style> 을 이 내용으로 통째로 바꿔 주세요.
+-->
+<style>
+
+  /* ===== 기존: 초기 상태 스타일 ===== */
+  #s20260904778f8ba2a04d9 {
+    border-radius: 9999px;  /* 요소를 완전히 둥근 모양으로 설정 */
+    margin: 15px auto;      /* 위, 아래 여백을 15px로 설정하고 가운데 정렬 */
+    max-width: 90%;         /* 최대 너비를 부모 요소의 90%로 제한 */
+    position: relative;     /* 자식 요소의 위치 설정을 위한 기준 */
+  }
+
+  /* ===== 기존: 스크롤로 인해 고정 상태가 활성화될 때 스타일 ===== */
+  #s20260904778f8ba2a04d9.scroll-to-fixed-fixed {
+    border-radius: 30px !important;            /* 고정 상태에서도 둥근 모양 유지 */
+    margin: 15px auto !important;              /* 고정 상태에서도 동일한 여백 유지 */
+    max-width: 90%;                            /* 최대 너비를 90%로 유지 */
+    left: 50% !important;                      /* 화면의 중앙으로 정렬 */
+    transform: translateX(-50%) !important;    /* 중앙 정렬을 위해 x축으로 -50% 이동 */
+  }
+
+  /* ===== 기존: 섹션 배경에 대한 둥근 모서리 설정 ===== */
+  #s20260904778f8ba2a04d9 .section_bg,
+  #s20260904778f8ba2a04d9 .section_bg_color {
+    border-radius: 30px;   /* 배경 요소에도 둥근 모양 적용 */
+  }
+
+  /* ================================================================
+     추가: 스크롤 전(맨 위)에도 스크롤 후와 같은 모양
+     흰 바 + 진한 글자 + 컬러 로고
+     ================================================================ */
+
+  /* 흰 바 배경 (원래는 스크롤 전에 투명) */
+  #s20260904778f8ba2a04d9 .section_bg_color {
+    background-color: #fff !important;
+  }
+
+  /* 메뉴 글자를 진하게 (현재 선택된 메뉴 HOME 의 색은 그대로 둠) */
+  #s20260904778f8ba2a04d9 .viewport-nav > li:not(.active) > a,
+  #s20260904778f8ba2a04d9 .viewport-nav > li.dropdown:not(.active) > a {
+    color: #212121 !important;
+  }
+
+  /* 로고: 스크롤 전용 로고는 숨기고, 컬러 로고를 항상 보여줌 */
+  #s20260904778f8ba2a04d9 img.normal_logo { opacity: 0 !important; }
+  #s20260904778f8ba2a04d9 img.scroll_logo { opacity: 1 !important; }
+
+</style>
