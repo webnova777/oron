@@ -47,7 +47,7 @@
       L.items = [
         // 위 띠: 꿔바칩 봉지 2개(오른쪽) + 과자 실물(왼쪽)
         { key: 'guobaPair', kind: 'rise', t: T.yellowBag, x: cx + 470, h: 500, line: L.lineA, rot: L.slope + 0.02, hide: 0.15 },
-        { key: 'chips',   kind: 'pop',  t: T.chips,     x: cx - 600, y: L.lineA(cx - 600) - 70, h: 260, rot: -0.10 },
+        { key: 'chips',   kind: 'pop',  t: T.chips,     x: cx - 600, y: L.lineA(cx - 600) - 60, h: 290, rot: -0.10 },
         // 가운데 띠: 바나나 봉지(왼쪽) + 바나나 과자(오른쪽)
         { key: 'banana',  kind: 'rise', t: T.bananaBag, x: cx - 380, h: 560, line: L.lineB, rot: -L.slope - 0.02, hide: 0.15 },
         { key: 'candy',   kind: 'pop',  t: T.candy,     x: cx + 360, y: (L.lineA(cx + 360) + L.lineB(cx + 360)) / 2 - 55, h: 185, rot: 0.06 },
@@ -64,7 +64,7 @@
       L.lineB = function (x) { return vh2 * 0.67 - k * (x - cx2); };
       L.items = [
         { key: 'guobaPair', kind: 'rise', t: T.yellowBag, x: cx2 + 100, h: vh2 * 0.2, line: L.lineA, rot: L.slope + 0.02, hide: 0.15 },
-        { key: 'chips',   kind: 'pop',  t: T.chips,     x: cx2 - 200, y: L.lineA(cx2 - 200) - 6, h: vh2 * 0.095, rot: -0.10 },
+        { key: 'chips',   kind: 'pop',  t: T.chips,     x: cx2 - 200, y: L.lineA(cx2 - 200) - 6, h: vh2 * 0.085, rot: -0.10 },
         { key: 'banana',  kind: 'rise', t: T.bananaBag, x: cx2 - 70, h: vh2 * 0.25, line: L.lineB, rot: -L.slope - 0.02, hide: 0.15 },
         { key: 'candy',   kind: 'pop',  t: T.candy,     x: cx2 + 160, y: (L.lineA(cx2 + 160) + L.lineB(cx2 + 160)) / 2 + 20, h: vh2 * 0.082, rot: 0.06 },
         { key: 'sesame',  kind: 'rise', t: T.sesameBag, x: cx2 + 125, h: vh2 * 0.25, line: null,    rot: 0.05,            hide: 0.16 },
