@@ -224,26 +224,28 @@
       if (cw / ch >= 1.15) {
         // 가로 화면: 높이를 1080 으로 보고, 폭은 비율대로 (넓은 화면은 띠가 좌우로 길어짐)
         L.scale = ch / 1080; L.vh = 1080; L.vw = cw / L.scale;
-        var cx = L.vw / 2, k = 0.085;
+        var cx = L.vw / 2, k = 0.15;                                 // k: 경계선 기울기 (약 8.5°)
         L.slope = Math.atan(k);
-        L.lineA = function (x) { return 530 + k * (x - cx); };     // 위 경계: 오른쪽으로 내려감
-        L.lineB = function (x) { return 760 - k * (x - cx); };     // 아래 경계: 오른쪽으로 올라감
+        // 세 영역이 비슷한 크기가 되도록 경계선 가운데 높이를 약 1/3 지점에 둠
+        L.lineA = function (x) { return 405 + k * (x - cx); };       // 위 경계: 오른쪽으로 내려감
+        L.lineB = function (x) { return 740 - k * (x - cx); };       // 아래 경계: 오른쪽으로 올라감
+        // h: 제품 높이 / hide: 아래쪽이 다음 띠에 가려지는 비율
         L.products = [
-          { key: 'guoba',  x: cx + 440, h: 450, line: L.lineA, rot:  L.slope + 0.02, margin: 14 },
-          { key: 'banana', x: cx - 440, h: 440, line: L.lineB, rot: -L.slope - 0.02, margin: 14 },
-          { key: 'sesame', x: cx + 420, h: 455, line: null,    rot:  0.05,            margin: 52 }
+          { key: 'guoba',  x: cx + 600, h: 480, line: L.lineA, rot:  L.slope + 0.02, hide: 0.15 },
+          { key: 'banana', x: cx - 470, h: 560, line: L.lineB, rot: -L.slope - 0.02, hide: 0.15 },
+          { key: 'sesame', x: cx + 430, h: 560, line: null,    rot:  0.05,            hide: 0.16 }
         ];
       } else {
         // 세로 화면: 폭을 700 으로 보고, 높이는 비율대로
         L.scale = cw / 700; L.vw = 700; L.vh = ch / L.scale;
-        var cx2 = 350, k2 = 0.12, vh = L.vh;
+        var cx2 = 350, k2 = 0.15, vh = L.vh;
         L.slope = Math.atan(k2);
-        L.lineA = function (x) { return vh * 0.36 + k2 * (x - cx2); };
-        L.lineB = function (x) { return vh * 0.66 - k2 * (x - cx2); };
+        L.lineA = function (x) { return vh * 0.34 + k2 * (x - cx2); };
+        L.lineB = function (x) { return vh * 0.67 - k2 * (x - cx2); };
         L.products = [
-          { key: 'guoba',  x: cx2 + 120, h: vh * 0.20, line: L.lineA, rot:  L.slope + 0.02, margin: 12 },
-          { key: 'banana', x: cx2 - 120, h: vh * 0.21, line: L.lineB, rot: -L.slope - 0.02, margin: 12 },
-          { key: 'sesame', x: cx2 + 100, h: vh * 0.22, line: null,    rot:  0.05,            margin: 36 }
+          { key: 'guoba',  x: cx2 + 110, h: vh * 0.27, line: L.lineA, rot:  L.slope + 0.02, hide: 0.15 },
+          { key: 'banana', x: cx2 - 110, h: vh * 0.29, line: L.lineB, rot: -L.slope - 0.02, hide: 0.15 },
+          { key: 'sesame', x: cx2 + 100, h: vh * 0.29, line: null,    rot:  0.05,            hide: 0.16 }
         ];
       }
       return L;
@@ -319,8 +321,8 @@
         if (prog <= 0) return;
 
         var h = p.h, w = img.width * h / img.height;
-        var baseY = (p.line ? p.line(p.x) : L.vh) - p.margin;        // 최종 위치: 경계선 바로 위
-        var rise = (1 - prog) * (h + 120);                             // 처음엔 경계선 아래에 숨어 있다가 올라옴
+        var baseY = (p.line ? p.line(p.x) : L.vh) + p.hide * h;       // 최종 위치: 아래쪽 일부가 경계선 아래로 들어가 가려짐
+        var rise = (1 - prog) * (h + 80);                              // 처음엔 경계선 아래에 완전히 숨어 있다가 올라옴
 
         ctx.save();
         // 마스크: 경계선 위쪽 영역만 보이게
