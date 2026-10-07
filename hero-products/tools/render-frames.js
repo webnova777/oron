@@ -21,7 +21,7 @@ const server = http.createServer((req, res) => {
   const port = server.address().port;
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--no-sandbox'] });
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-  await page.goto(`http://127.0.0.1:${port}/preview.html${process.env.GLOW ? '?glow=1' : ''}`);
+  await page.goto(`http://127.0.0.1:${port}/preview.html`);
   await page.waitForFunction('window.READY === true');
   const duration = await page.evaluate('ORON_COMPOSE.DURATION');
   const total = Math.round(duration * FPS) + 1;
