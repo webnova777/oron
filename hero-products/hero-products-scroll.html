@@ -246,9 +246,12 @@
           { x: cx2, y: L.lineA(cx2), dir: 1, rot: L.slope, w: 660 },
           { x: cx2, y: L.lineB(cx2), dir: 1, rot: -L.slope, w: 660 }
         ];
+        // 새 참깨 봉지: 기울어진 오른쪽 윗모서리까지 계산해서 화면 오른쪽(폭 700)을 넘지 않게 x 를 정함
+        var s2h = Math.min(vh2 * 0.3, 410), s2a = L.slope + 0.03;
+        var s2x = 686 - s2h * (0.347 * Math.cos(s2a) + Math.sin(s2a));
         L.items = [
-            { key: 'sesame2', kind: 'rise', t: T.redBag,    x: cx2 + 160, h: Math.min(vh2 * 0.3, 410), line: L.lineA, rot: L.slope + 0.03, hide: 0.16 },
-        { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx2 - 105, h: Math.min(vh2 * 0.27, 380), line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
+            { key: 'sesame2', kind: 'rise', t: T.redBag,    x: s2x, h: s2h, line: L.lineA, rot: L.slope + 0.03, hide: 0.16 },
+        { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx2 - 125, h: Math.min(vh2 * 0.27, 380), line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
         { key: 'balls',   kind: 'pop',  t: T.chips,     x: cx2 - 235, y: L.lineA(cx2 - 235) - vh2 * 0.045, h: vh2 * 0.085, rot: -0.05 },
         { key: 'guobaPair', kind: 'rise', t: T.bananaBag, x: cx2 - 6, h: Math.min(vh2 * 0.2, 275), line: L.lineB, rot: -L.slope - 0.02, hide: 0.14 },
         { key: 'chips',   kind: 'pop',  t: T.candy,     x: cx2 + 200, y: L.lineA(cx2 + 200) + vh2 * 0.055, h: vh2 * 0.052, rot: 0.06 },
