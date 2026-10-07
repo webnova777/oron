@@ -55,8 +55,8 @@
       ];
       L.items = [
         // 위 띠: 참깨 크런치볼 봉지(오른쪽) + 과자 실물(왼쪽)
-        { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx + 215, h: 455, line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
           { key: 'sesame2', kind: 'rise', t: T.redBag,    x: cx + 560, h: 450, line: L.lineA, rot: L.slope + 0.03, hide: 0.16 },
+        { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx + 215, h: 455, line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
         { key: 'balls',   kind: 'pop',  t: T.chips,     x: cx - 520, y: L.lineA(cx - 520) - 85, h: 215, rot: -0.05 },
         // 가운데 띠: 꿔바칩 봉지 2개(왼쪽) + 과자 실물(오른쪽)
         { key: 'guobaPair', kind: 'rise', t: T.bananaBag, x: cx - 400, h: 352, line: L.lineB, rot: -L.slope - 0.02, hide: 0.15 },
@@ -78,8 +78,8 @@
         { x: cx2, y: L.lineB(cx2), dir: 1, rot: -L.slope, w: 660 }
       ];
       L.items = [
-      { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx2 - 78, h: Math.min(vh2 * 0.28, 395), line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
           { key: 'sesame2', kind: 'rise', t: T.redBag,    x: cx2 + 195, h: Math.min(vh2 * 0.3, 410), line: L.lineA, rot: L.slope + 0.03, hide: 0.16 },
+      { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx2 - 78, h: Math.min(vh2 * 0.28, 395), line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
       { key: 'balls',   kind: 'pop',  t: T.chips,     x: cx2 - 235, y: L.lineA(cx2 - 235) - vh2 * 0.045, h: vh2 * 0.085, rot: -0.05 },
       { key: 'guobaPair', kind: 'rise', t: T.bananaBag, x: cx2 - 6, h: Math.min(vh2 * 0.216, 298), line: L.lineB, rot: -L.slope - 0.02, hide: 0.14 },
       { key: 'chips',   kind: 'pop',  t: T.candy,     x: cx2 + 200, y: L.lineA(cx2 + 200) + vh2 * 0.055, h: vh2 * 0.056, rot: 0.06 },
