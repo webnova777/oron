@@ -16,7 +16,7 @@
 <script src="compose.js"></script>
 <script>
   // 제품 이미지를 불러온 뒤 t(초) 시점의 장면을 그립니다. (render-frames.js 도 같은 함수를 씁니다)
-  var names = { guobaPair: 'assets/guoba-pair.png', chips: 'assets/chips.png', banana: 'assets/banana.png', candy: 'assets/banana-candy.png', sesame: 'assets/sesame.png', balls: 'assets/sesame-balls.png' };
+  var names = { guobaPair: 'assets/guoba-pair.png', chips: 'assets/chips.png', banana: 'assets/banana.png', candy: 'assets/banana-candy.png', sesame: 'assets/sesame.png', sesame2: 'assets/sesame-pack2.png', balls: 'assets/sesame-balls.png' };
   var images = {}, left = Object.keys(names).length;
   Object.keys(names).forEach(function (k) {
     var im = new Image(); im.onload = function () { images[k] = im; if (!--left) { window.READY = true; draw(0); } };

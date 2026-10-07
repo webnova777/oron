@@ -44,7 +44,7 @@
       // 가로 화면: 16:9 보다 넓으면 높이 기준(1080), 좁으면 폭 기준(1920)으로 맞춤
       L.scale = (cw / ch >= 16 / 9) ? ch / 1080 : cw / 1920;
       L.vw = cw / L.scale; L.vh = ch / L.scale;
-      var cx = L.vw / 2, vh = L.vh, yA = vh * 0.375, yB = vh * 0.685;
+      var cx = L.vw / 2, vh = L.vh, yA = vh * 0.415, yB = vh * 0.705;
       L.slope = Math.atan(k);
       L.lineA = function (x) { return yA + k * (x - cx); };        // 위 경계: 오른쪽으로 내려감
       L.lineB = function (x) { return yB - k * (x - cx); };        // 아래 경계: 오른쪽으로 올라감
@@ -55,11 +55,12 @@
       ];
       L.items = [
         // 위 띠: 참깨 크런치볼 봉지(오른쪽) + 과자 실물(왼쪽)
-        { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx + 430, h: 410, line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
-        { key: 'balls',   kind: 'pop',  t: T.chips,     x: cx - 560, y: L.lineA(cx - 560) - 85, h: 215, rot: -0.05 },
+        { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx + 215, h: 455, line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
+          { key: 'sesame2', kind: 'rise', t: T.redBag,    x: cx + 560, h: 450, line: L.lineA, rot: L.slope + 0.03, hide: 0.16 },
+        { key: 'balls',   kind: 'pop',  t: T.chips,     x: cx - 520, y: L.lineA(cx - 520) - 85, h: 215, rot: -0.05 },
         // 가운데 띠: 꿔바칩 봉지 2개(왼쪽) + 과자 실물(오른쪽)
-        { key: 'guobaPair', kind: 'rise', t: T.bananaBag, x: cx - 390, h: 440, line: L.lineB, rot: -L.slope - 0.02, hide: 0.15 },
-        { key: 'chips',   kind: 'pop',  t: T.candy,     x: cx + 565, y: L.lineB(cx + 565) - 55, h: 175, rot: 0.06 },
+        { key: 'guobaPair', kind: 'rise', t: T.bananaBag, x: cx - 400, h: 352, line: L.lineB, rot: -L.slope - 0.02, hide: 0.15 },
+        { key: 'chips',   kind: 'pop',  t: T.candy,     x: cx + 565, y: L.lineB(cx + 565) - 50, h: 140, rot: 0.06 },
         // 아래 띠: 바나나 초콜릿 봉지(오른쪽) + 바나나 과자(왼쪽)
         { key: 'banana',  kind: 'rise', t: T.sesameBag, x: cx + 410, h: 430, line: null,    rot: 0.05,            hide: 0.16 },
         { key: 'candy',   kind: 'pop',  t: T.balls,     x: cx - 440, y: vh - 130, h: 160, rot: -0.06 }
@@ -69,18 +70,19 @@
       L.scale = cw / 700; L.vw = 700; L.vh = ch / L.scale;
       var cx2 = 350, vh2 = L.vh;
       L.slope = Math.atan(k);
-      L.lineA = function (x) { return vh2 * 0.34 + k * (x - cx2); };
-      L.lineB = function (x) { return vh2 * 0.67 - k * (x - cx2); };
+      L.lineA = function (x) { return vh2 * 0.385 + k * (x - cx2); };
+      L.lineB = function (x) { return vh2 * 0.69 - k * (x - cx2); };
       L.names = [
         { x: cx2, y: L.lineA(cx2), dir: -1, rot: L.slope, w: 660, lines: ['SESAME', 'CRUNCH BALLS'] },
         { x: cx2, y: L.lineA(cx2), dir: 1, rot: L.slope, w: 660 },
         { x: cx2, y: L.lineB(cx2), dir: 1, rot: -L.slope, w: 660 }
       ];
       L.items = [
-      { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx2 + 48, h: Math.min(vh2 * 0.29, 400), line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
+      { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx2 - 78, h: Math.min(vh2 * 0.28, 395), line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
+          { key: 'sesame2', kind: 'rise', t: T.redBag,    x: cx2 + 195, h: Math.min(vh2 * 0.3, 410), line: L.lineA, rot: L.slope + 0.03, hide: 0.16 },
       { key: 'balls',   kind: 'pop',  t: T.chips,     x: cx2 - 235, y: L.lineA(cx2 - 235) - vh2 * 0.045, h: vh2 * 0.085, rot: -0.05 },
-      { key: 'guobaPair', kind: 'rise', t: T.bananaBag, x: cx2 - 6, h: Math.min(vh2 * 0.27, 372), line: L.lineB, rot: -L.slope - 0.02, hide: 0.14 },
-      { key: 'chips',   kind: 'pop',  t: T.candy,     x: cx2 + 200, y: L.lineA(cx2 + 200) + vh2 * 0.055, h: vh2 * 0.07, rot: 0.06 },
+      { key: 'guobaPair', kind: 'rise', t: T.bananaBag, x: cx2 - 6, h: Math.min(vh2 * 0.216, 298), line: L.lineB, rot: -L.slope - 0.02, hide: 0.14 },
+      { key: 'chips',   kind: 'pop',  t: T.candy,     x: cx2 + 200, y: L.lineA(cx2 + 200) + vh2 * 0.055, h: vh2 * 0.056, rot: 0.06 },
       { key: 'banana',  kind: 'rise', t: T.sesameBag, x: cx2 + 50, h: Math.min(vh2 * 0.26, 400), line: null,    rot: 0.05,            hide: 0.16 },
       { key: 'candy',   kind: 'pop',  t: T.balls,     x: cx2 - 215, y: vh2 - vh2 * 0.09, h: vh2 * 0.07, rot: -0.06 }
     ];
@@ -211,5 +213,5 @@
     ctx.restore();
   }
 
-  root.ORON_COMPOSE = { render: render, layout: layout, DURATION: DURATION, KEYS: ['guobaPair', 'chips', 'banana', 'candy', 'sesame', 'balls'] };
+  root.ORON_COMPOSE = { render: render, layout: layout, DURATION: DURATION, KEYS: ['guobaPair', 'chips', 'banana', 'candy', 'sesame', 'sesame2', 'balls'] };
 })(typeof window !== 'undefined' ? window : this);
