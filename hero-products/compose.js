@@ -48,10 +48,10 @@
       L.slope = Math.atan(k);
       L.lineA = function (x) { return yA + k * (x - cx); };        // 위 경계: 오른쪽으로 내려감
       L.lineB = function (x) { return yB - k * (x - cx); };        // 아래 경계: 오른쪽으로 올라감
-      L.names = [   // 제품명 글자(기울이지 않음): x,y=중심, w=글자 폭(px) — 띠 폭을 꽉 채우고, 띠 밖으로 나가는 부분은 잘림
-        { x: cx, y: 205, rot: 0, w: L.vw * 0.98 },
-        { x: cx, y: 560, rot: 0, w: L.vw * 0.98 },
-        { x: cx, y: 905, rot: 0, w: L.vw * 0.98 }
+      L.names = [   // 제품명 글자: x = 글자 중심(가로), y = 경계선의 높이, dir = -1 선 바로 위 / +1 선 바로 아래, rot = 선과 같은 기울기, w = 글자 폭(px)
+        { x: cx, y: L.lineA(cx), dir: -1, rot: L.slope, w: L.vw * 0.99 },
+        { x: 40 + 665, y: L.lineB(40 + 665), dir: -1, rot: -L.slope, w: 1330 },
+        { x: cx, y: L.lineB(cx), dir: 1, rot: -L.slope, w: L.vw * 0.99 }
       ];
       L.items = [
         // 위 띠: 참깨 크런치볼 봉지(오른쪽) + 과자 실물(왼쪽)
@@ -72,9 +72,9 @@
       L.lineA = function (x) { return vh2 * 0.34 + k * (x - cx2); };
       L.lineB = function (x) { return vh2 * 0.67 - k * (x - cx2); };
       L.names = [
-        { x: cx2, y: vh2 * 0.105, rot: 0, w: 660, lines: ['SESAME', 'CRUNCH BALLS'] },
-        { x: cx2, y: vh2 * 0.385, rot: 0, w: 660 },
-        { x: cx2, y: (L.lineB(cx2) + vh2) / 2, rot: 0, w: 660, lines: ['BANANA', 'CHOCOLATE'] }
+        { x: cx2, y: L.lineA(cx2), dir: -1, rot: L.slope, w: 660, lines: ['SESAME', 'CRUNCH BALLS'] },
+        { x: cx2, y: L.lineA(cx2), dir: 1, rot: L.slope, w: 660 },
+        { x: cx2, y: L.lineB(cx2), dir: 1, rot: -L.slope, w: 660 }
       ];
       L.items = [
       { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx2 + 48, h: Math.min(vh2 * 0.29, 400), line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
@@ -120,8 +120,8 @@
     g.restore();
   }
 
-  // ----- 영어 제품명: 띠 색보다 아주 살짝 진한 색, 띠의 기울기에 맞춰 크게 (제품 뒤에 깔림) -----
-  function drawName(g, L, band, top, bottom, lines, cx, cy, rot, width, reveal) {
+  // ----- 영어 제품명: 띠 색보다 아주 살짝 진한 색. 띠의 경계선과 나란히 기울여 선 바로 위(dir=-1) 또는 바로 아래(dir=+1)에 붙임 -----
+  function drawName(g, L, band, top, bottom, lines, cx, ay, dir, rot, width, reveal) {
     if (reveal <= 0) return;
     var fam = 'sans-serif';
     try { fam = getComputedStyle(g.canvas).fontFamily || fam; } catch (e) {}
@@ -129,14 +129,18 @@
     var x0 = -300, x1 = L.vw + 300;                                   // 자기 띠 안쪽에서만 보이도록 자름
     g.beginPath(); g.moveTo(x0, top(x0)); g.lineTo(x1, top(x1)); g.lineTo(x1, bottom(x1)); g.lineTo(x0, bottom(x0)); g.closePath(); g.clip();
     g.globalAlpha = clamp((reveal - 0.3) / 0.7, 0, 1);
-    g.translate(cx, cy); g.rotate(rot);
-    var size = 100, widest = 0;
+    g.translate(cx, ay); g.rotate(rot);                               // (cx, ay) = 경계선 위의 점, 글자 밑줄이 선과 나란함
+    var size = 100, widest = 0, gap = 12, cap;
     g.font = '900 ' + size + 'px ' + fam;
     lines.forEach(function (t) { widest = Math.max(widest, g.measureText(t).width); });
     size = size * width / widest;                                     // 가장 긴 줄의 폭이 width 가 되도록
     g.font = '900 ' + size + 'px ' + fam;
-    g.fillStyle = band.text; g.textAlign = 'center'; g.textBaseline = 'middle';
-    lines.forEach(function (t, i) { g.fillText(t, 0, (i - (lines.length - 1) / 2) * size * 1.02); });
+    cap = size * 0.72;
+    g.fillStyle = band.text; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+    lines.forEach(function (t, i) {
+      var y = dir < 0 ? -gap - (lines.length - 1 - i) * size * 1.02 : gap + cap + i * size * 1.02;
+      g.fillText(t, 0, y);
+    });
     g.restore();
   }
 
@@ -193,9 +197,9 @@
 
     // 영어 제품명 (띠 위, 제품 뒤)
     var N = L.names, up = function () { return -300; }, down = function () { return L.vh + 300; };
-    drawName(ctx, L, COLORS.band1, up, L.lineA, N[0].lines || NAMES[0], N[0].x, N[0].y, N[0].rot, N[0].w, r1);
-    drawName(ctx, L, COLORS.band2, L.lineA, L.lineB, N[1].lines || NAMES[1], N[1].x, N[1].y, N[1].rot, N[1].w, r2);
-    drawName(ctx, L, COLORS.band3, L.lineB, down, N[2].lines || NAMES[2], N[2].x, N[2].y, N[2].rot, N[2].w, r3);
+    drawName(ctx, L, COLORS.band1, up, L.lineA, N[0].lines || NAMES[0], N[0].x, N[0].y, N[0].dir, N[0].rot, N[0].w, r1);
+    drawName(ctx, L, COLORS.band2, L.lineA, L.lineB, N[1].lines || NAMES[1], N[1].x, N[1].y, N[1].dir, N[1].rot, N[1].w, r2);
+    drawName(ctx, L, COLORS.band3, L.lineB, down, N[2].lines || NAMES[2], N[2].x, N[2].y, N[2].dir, N[2].rot, N[2].w, r3);
 
     // 패키지와 과자: 배열 순서대로 겹쳐 그림
     L.items.forEach(function (p) {
