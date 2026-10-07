@@ -59,7 +59,8 @@
         { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx + 215, h: 455, line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
         { key: 'balls',   kind: 'pop',  t: T.chips,     x: cx - 520, y: L.lineA(cx - 520) - 85, h: 215, rot: -0.05 },
         // 가운데 띠: 꿔바칩 봉지 2개(왼쪽) + 과자 실물(오른쪽)
-        { key: 'guobaPair', kind: 'rise', t: T.bananaBag, x: cx - 400, h: 352, line: L.lineB, rot: -L.slope - 0.02, hide: 0.15 },
+        { key: 'guobaY', kind: 'rise', t: T.bananaBag, x: cx - 520, h: 350, line: L.lineB, rot: -L.slope - 0.02, hide: 0.15 },
+          { key: 'guobaR', kind: 'rise', t: [2.80, 1.30],  x: cx - 290, h: 350, line: L.lineB, rot: -L.slope - 0.01, hide: 0.15 },
         { key: 'chips',   kind: 'pop',  t: T.candy,     x: cx + 565, y: L.lineB(cx + 565) - 50, h: 140, rot: 0.06 },
         // 아래 띠: 바나나 초콜릿 봉지(오른쪽) + 바나나 과자(왼쪽)
         { key: 'banana',  kind: 'rise', t: T.sesameBag, x: cx + 410, h: 430, line: null,    rot: 0.05,            hide: 0.16 },
@@ -84,7 +85,8 @@
           { key: 'sesame2', kind: 'rise', t: T.redBag,    x: s2x, h: s2h, line: L.lineA, rot: L.slope + 0.03, hide: 0.16 },
       { key: 'sesame',  kind: 'rise', t: T.yellowBag, x: cx2 - 125, h: Math.min(vh2 * 0.27, 380), line: L.lineA, rot: L.slope + 0.02, hide: 0.16 },
       { key: 'balls',   kind: 'pop',  t: T.chips,     x: cx2 - 235, y: L.lineA(cx2 - 235) - vh2 * 0.045, h: vh2 * 0.085, rot: -0.05 },
-      { key: 'guobaPair', kind: 'rise', t: T.bananaBag, x: cx2 - 6, h: Math.min(vh2 * 0.2, 275), line: L.lineB, rot: -L.slope - 0.02, hide: 0.14 },
+      { key: 'guobaY', kind: 'rise', t: T.bananaBag, x: cx2 - 96, h: Math.min(vh2 * 0.2, 275), line: L.lineB, rot: -L.slope - 0.02, hide: 0.14 },
+          { key: 'guobaR', kind: 'rise', t: [2.80, 1.30], x: cx2 + 84, h: Math.min(vh2 * 0.2, 275), line: L.lineB, rot: -L.slope - 0.01, hide: 0.14 },
       { key: 'chips',   kind: 'pop',  t: T.candy,     x: cx2 + 200, y: L.lineA(cx2 + 200) + vh2 * 0.055, h: vh2 * 0.052, rot: 0.06 },
       { key: 'banana',  kind: 'rise', t: T.sesameBag, x: cx2 + 85, h: Math.min(vh2 * 0.26, 400), line: null,    rot: 0.05,            hide: 0.16 },
       { key: 'candy',   kind: 'pop',  t: T.balls,     x: cx2 - 215, y: vh2 - vh2 * 0.09, h: vh2 * 0.07, rot: -0.06 }
@@ -216,5 +218,5 @@
     ctx.restore();
   }
 
-  root.ORON_COMPOSE = { render: render, layout: layout, DURATION: DURATION, KEYS: ['guobaPair', 'chips', 'banana', 'candy', 'sesame', 'sesame2', 'balls'] };
+  root.ORON_COMPOSE = { render: render, layout: layout, DURATION: DURATION, KEYS: ['guobaY', 'guobaR', 'chips', 'banana', 'candy', 'sesame', 'sesame2', 'balls'] };
 })(typeof window !== 'undefined' ? window : this);

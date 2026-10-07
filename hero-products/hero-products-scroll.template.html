@@ -172,7 +172,7 @@
   var COMPOSE = window.ORON_COMPOSE;
 
   // ----- 제품 이미지 불러오기 (실패하면 최대 2번 다시 시도) -----
-  var FILES = { guobaPair: 'guoba-pair.png', chips: 'chips.png', banana: 'banana.png', candy: 'banana-candy.png', sesame: 'sesame.png', sesame2: 'sesame-pack2.png', balls: 'sesame-balls.png' };
+  var FILES = { guobaY: 'guoba-yellow.png', guobaR: 'guoba-red.png', chips: 'chips.png', banana: 'banana.png', candy: 'banana-candy.png', sesame: 'sesame.png', sesame2: 'sesame-pack2.png', balls: 'sesame-balls.png' };
   function loadImage(key, tries) {
     var img = new Image();
     img.onload = function () { images[key] = img; lastDrawn = -1; };
